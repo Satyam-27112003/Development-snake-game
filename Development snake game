@@ -1,0 +1,158 @@
+#include <iostream>
+#include <conio.h>
+#include <windows.h>
+#include <vector>
+
+using namespace std;
+
+
+const int width = 20;
+const int height = 20;
+const int initialSnakeLength = 5;
+
+
+enum Direction { STOP, LEFT, RIGHT, UP, DOWN };
+
+struct Point {
+    int x;
+    int y;
+};
+
+
+class Snake {
+public:
+    vector<Point> body;
+    Direction direction;
+
+    Snake() {
+        direction = STOP;
+        body.push_back({ width / 2, height / 2 });
+        for (int i = 0; i < initialSnakeLength - 1; i++) {
+            body.push_back({ body.back().x - 1, body.back().y });
+        }
+    }
+
+    void move() {
+        Point newHead = body.back();
+        switch (direction) {
+        case LEFT:
+            newHead.x--;
+            break;
+        case RIGHT:
+            newHead.x++;
+            break;
+        case UP:
+            newHead.y--;
+            break;
+        case DOWN:
+            newHead.y++;
+            break;
+        }
+        body.push_back(newHead);
+        body.erase(body.begin());
+    }
+
+    void grow() {
+        Point newHead = body.back();
+        switch (direction) {
+        case LEFT:
+            newHead.x--;
+            break;
+        case RIGHT:
+            newHead.x++;
+            break;
+        case UP:
+            newHead.y--;
+            break;
+        case DOWN:
+            newHead.y++;
+            break;
+        }
+        body.push_back(newHead);
+    }
+};
+
+void drawBoard(Snake& snake) {
+    system("cls");
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            bool isSnake = false;
+            for (const auto& point : snake.body) {
+                if (point.x == j && point.y == i) {
+                    isSnake = true;
+                    break;
+                }
+            }
+            if (isSnake) {
+                cout << "O";
+            } else {
+                cout << ".";
+            }
+        }
+        cout << endl;
+    }
+}
+
+int main() {
+    Snake snake;
+    Point food = { rand() % width, rand() % height };
+    int score = 0;
+
+    while (true) {
+        drawBoard(snake);
+        cout << "Score: " << score << endl;
+
+        
+        if (_kbhit()) {
+            char input = _getch();
+            switch (input) {
+            case 'a':
+                if (snake.direction != RIGHT) {
+                    snake.direction = LEFT;
+                }
+                break;
+            case 'd':
+                if (snake.direction != LEFT) {
+                    snake.direction = RIGHT;
+                }
+                break;
+            case 'w':
+                if (snake.direction != DOWN) {
+                    snake.direction = UP;
+                }
+                break;
+            case 's':
+                if (snake.direction != UP) {
+                    snake.direction = DOWN;
+                }
+                break;
+            }
+        }
+
+       
+        snake.move();
+
+        
+        if (snake.body.back().x == food.x && snake.body.back().y == food.y) {
+            snake.grow();
+            food = { rand() % width, rand() % height };
+            score++;
+        }
+
+       
+        if (snake.body.back().x < 0 || snake.body.back().x >= width ||
+            snake.body.back().y < 0 || snake.body.back().y >= height) {
+            cout << "Game over! Final score: " << score << endl;
+            break;
+        }
+        for (size_t i = 0; i < snake.body.size() - 1; i++) {
+            if (snake.body.back().x == snake.body[i].x && snake.body.back().y == snake.body[i].y) {
+                cout << "Game over! Final score: " << score << endl;
+                break;
+            }
+        }
+        Sleep(100);
+    }
+
+    return 0;
+}
